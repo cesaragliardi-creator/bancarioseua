@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  BLO Monitor · Banking Labor Observatory                        ║
+  ║  Motor de Cálculo AG-999 · Fórmulas 04A e 06A                          ║
+  ║  © Cesar Agliardi Pereira / SilentSystem999 · All rights reserved               ║
+  ║  US Copyright Law — Intellectual Property Protected                       ║
+  ║                                                                          ║
+  ║  OBRA VINCULADA — Hash SHA-256 de Anterioridade:                        ║
+  ║  bbe47fa849c18e6d7d8b67ec6148c4efa4a724e7ba4c7a94bac6151fbca391a5      ║
+  ║  Livro: Mental Health no Sistema Financeiro e o Custo Invisível do Lucro ║
+  ║                                                                          ║
+  ║  This application constitutes a direct extension of the literary work above      ║
+  ║  certified. Book and app form a single traceable intellectual body. ║
+  ║  Reproduction prohibited without express written authorization from the author.     ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLO Monitor · Banking Labor Observatory</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1B4F8A;--blue-light:#E8F0FB;--blue-dark:#0F3360;--blue-mid:#2E6BB5;
+  --red:#D62828;--red-light:#FDEAEA;
+  --amber:#E87C1E;--amber-light:#FEF3E7;
+  --green:#2D9B6C;--green-light:#E3F5EE;--green-dark:#1A6B49;
+  --purple:#6B5EA8;--purple-light:#EDEBF9;
+  --bg:#EEF2F7;--surface:#FFFFFF;
+  --border:rgba(0,0,0,0.09);
+  --text:#1a2535;--text-muted:#5e738a;--text-faint:#94a3b8;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+h1,h2,h3,.logo{font-family:'Syne',sans-serif;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--blue-dark);color:#fff;position:sticky;top:0;z-index:1100;box-shadow:0 2px 8px rgba(0,0,0,0.25);}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+.logo{font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
+.logo span{color:#60B4FF;}
+.tagline{font-size:10px;color:rgba(255,255,255,0.55);letter-spacing:0.04em;text-transform:uppercase;}
+.topbar-metrics{display:flex;gap:24px;}
+.tb-metric{text-align:center;}
+.tb-val{font-size:17px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;}
+.tb-lbl{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.04em;}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border-radius:99px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,0.85);font-weight:500;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.main-nav{display:flex;gap:4px;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:53px;z-index:1000;}
+.nav-btn{padding:7px 16px;border:1px solid var(--border);border-radius:99px;background:none;cursor:pointer;font-size:13px;color:var(--text-muted);white-space:nowrap;transition:all 0.15s;font-family:'IBM Plex Sans',sans-serif;}
+.nav-btn:hover{background:var(--bg);color:var(--text);}
+.nav-btn.active{background:var(--blue-light);color:var(--blue-dark);border-color:var(--blue);font-weight:600;}
+.nav-btn.denuncia-btn{background:var(--red-light);color:var(--red);border-color:var(--red);font-weight:700;}
+.nav-btn.denuncia-btn.active{background:var(--red);color:#fff;}
+
+.sections{padding:20px 24px;}
+.section{display:none;}
+.section.active{display:block;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.section-header h2{font-size:17px;font-weight:700;color:var(--text);}
+
+.badge{display:inline-flex;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;}
+.badge.red{background:var(--red-light);color:var(--red);}
+.badge.amber{background:var(--amber-light);color:#9A4B0E;}
+.badge.green{background:var(--green-light);color:var(--green-dark);}
+.badge.blue{background:var(--blue-light);color:var(--blue-dark);}
+.badge.purple{background:var(--purple-light);color:var(--purple);}
+
+/* MAP */
+.map-layout{display:grid;grid-template-columns:1fr 300px;gap:16px;height:560px;}
+.map-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden;box-shadow:var(--shadow);}
+#leafletMap{width:100%;height:100%;border-radius:var(--radius);}
+.map-overlay-title{position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;font-size:12px;font-weight:700;color:var(--text);z-index:500;pointer-events:none;font-family:'Syne',sans-serif;}
+.map-legend{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,0.97);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;z-index:500;pointer-events:none;}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);margin-bottom:5px;}
+.legend-item:last-child{margin-bottom:0;}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.map-sidebar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-y:auto;box-shadow:var(--shadow);}
+.sidebar-title{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:12px 14px 8px;border-bottom:1px solid var(--border);}
+.city-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.15s;}
+.city-item:hover{background:var(--blue-light);}
+.city-name{font-size:12px;font-weight:600;}
+.city-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.city-burnout{font-size:13px;font-weight:700;margin-top:4px;}
+.score-bar{height:4px;border-radius:2px;background:var(--bg);overflow:hidden;margin-top:4px;}
+.score-fill{height:100%;border-radius:2px;}
+
+/* STATE BRANCHES */
+.state-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;min-height:600px;}
+.state-nav{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-y:auto;box-shadow:var(--shadow);}
+.state-nav-title{padding:12px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);}
+.state-btn{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.12s;font-size:13px;}
+.state-btn:hover{background:var(--blue-light);}
+.state-btn.active{background:var(--blue-light);color:var(--blue-dark);font-weight:700;border-left:3px solid var(--blue);}
+.state-sigla{font-weight:700;font-size:12px;width:28px;}
+.state-name{flex:1;font-size:12px;}
+.state-count{font-size:10px;color:var(--text-faint);}
+.state-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.branches-painel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+.ag-header{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.ag-header-title{font-size:18px;font-weight:800;font-family:'Syne',sans-serif;color:var(--text);margin-bottom:4px;}
+.ag-header-sub{font-size:12px;color:var(--text-muted);}
+.ag-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.ag-kpi{background:var(--bg);border-radius:var(--radius-sm);padding:12px;text-align:center;}
+.ag-kpi-val{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;}
+.ag-kpi-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:2px;}
+.ag-list-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:10px;}
+.ag-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;transition:all 0.15s;}
+.ag-item:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(27,79,138,0.1);}
+.ag-item-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.ag-item-name{font-size:13px;font-weight:700;}
+.ag-item-end{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.ag-item-bank{font-size:10px;font-weight:600;color:var(--blue);background:var(--blue-light);padding:2px 8px;border-radius:99px;}
+.ag-metrics{display:flex;gap:12px;flex-wrap:wrap;}
+.ag-metric{font-size:11px;color:var(--text-muted);}
+.ag-metric strong{font-weight:700;}
+.ag-denuncia-btn{margin-top:10px;background:var(--red-light);color:var(--red);border:1px solid rgba(214,40,40,0.3);border-radius:var(--radius-sm);padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all 0.15s;}
+.ag-denuncia-btn:hover{background:var(--red);color:#fff;}
+.ag-search{display:flex;gap:8px;margin-bottom:14px;}
+.ag-search input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'IBM Plex Sans',sans-serif;}
+.ag-search select{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:'IBM Plex Sans',sans-serif;}
+
+/* DENÚNCIAS */
+.denuncia-layout{display:grid;grid-template-columns:1fr 340px;gap:16px;}
+.denuncia-form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);}
+.denuncia-sidebar{display:flex;flex-direction:column;gap:14px;}
+.denuncia-aviso{background:linear-gradient(135deg,#0F3360,#1B4F8A);border-radius:var(--radius);padding:20px;color:#fff;}
+.denuncia-aviso-title{font-size:14px;font-weight:700;margin-bottom:8px;font-family:'Syne',sans-serif;}
+.denuncia-aviso-text{font-size:12px;line-height:1.7;color:rgba(255,255,255,0.85);}
+.denuncia-stats{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+.denuncia-stats-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:12px;}
+.ds-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.ds-row:last-child{border-bottom:none;}
+.ds-num{font-size:17px;font-weight:800;font-family:'Syne',sans-serif;}
+.denuncia-recentes{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+.dr-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:10px;}
+.dr-item{padding:10px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:8px;border-left:3px solid var(--amber);}
+.dr-item.crit{border-color:var(--red);}
+.dr-item.ok{border-color:var(--green);}
+.dr-tipo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-faint);margin-bottom:3px;}
+.dr-city{font-size:12px;font-weight:600;margin-bottom:2px;}
+.dr-texto{font-size:11px;color:var(--text-muted);line-height:1.5;}
+.dr-data{font-size:10px;color:var(--text-faint);margin-top:4px;}
+
+/* STEPS */
+.steps{display:flex;gap:0;margin-bottom:24px;}
+.step{flex:1;text-align:center;position:relative;}
+.step::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+.step:last-child::after{display:none;}
+.step-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text-muted);position:relative;z-index:1;margin-bottom:4px;}
+.step.active .step-circle{background:var(--blue);border-color:var(--blue);color:#fff;}
+.step.done .step-circle{background:var(--green);border-color:var(--green);color:#fff;}
+.step.active::after,.step.done::after{background:var(--blue);}
+.step-label{font-size:10px;color:var(--text-muted);display:block;}
+.step.active .step-label{color:var(--blue);font-weight:600;}
+.step-content{display:none;}
+.step-content.active{display:block;}
+
+/* FORM */
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;display:block;}
+.form-label span{color:var(--red);margin-left:2px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:'IBM Plex Sans',sans-serif;color:var(--text);background:var(--bg);transition:border 0.15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--blue);background:#fff;}
+.form-textarea{min-height:100px;resize:vertical;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-hint{font-size:11px;color:var(--text-faint);margin-top:4px;}
+.btn-primary{background:var(--blue);color:#fff;border:none;padding:11px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:background 0.15s;}
+.btn-primary:hover{background:var(--blue-dark);}
+.btn-danger{background:var(--red);color:#fff;border:none;padding:11px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:background 0.15s;}
+.btn-danger:hover{background:#a81e1e;}
+.btn-secondary{background:var(--bg);color:var(--text-muted);border:1px solid var(--border);padding:11px 20px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
+.btn-row{display:flex;gap:10px;margin-top:6px;}
+
+/* TIPO DENÚNCIA CARDS */
+.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.tipo-card{border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;cursor:pointer;text-align:center;transition:all 0.15s;background:var(--bg);}
+.tipo-card:hover{border-color:var(--blue);background:var(--blue-light);}
+.tipo-card.selected{border-color:var(--blue);background:var(--blue-light);}
+.tipo-card.selected-red{border-color:var(--red);background:var(--red-light);}
+.tipo-icon{font-size:24px;margin-bottom:6px;}
+.tipo-label{font-size:11px;font-weight:700;color:var(--text);}
+.tipo-sub{font-size:10px;color:var(--text-muted);margin-top:2px;}
+
+/* GRAVIDADE */
+.grav-row{display:flex;gap:8px;flex-wrap:wrap;}
+.grav-btn{padding:7px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;background:var(--bg);}
+.grav-btn:hover,.grav-btn.sel{border-color:var(--blue);background:var(--blue-light);color:var(--blue-dark);}
+.grav-btn.sel-red{border-color:var(--red);background:var(--red-light);color:var(--red);}
+.grav-btn.sel-amber{border-color:var(--amber);background:var(--amber-light);color:#9A4B0E;}
+
+/* PROTOCOL CODE */
+.protocolo-box{background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:var(--radius);padding:24px;color:#fff;text-align:center;margin-top:20px;}
+.protocolo-code{font-size:28px;font-weight:800;letter-spacing:0.2em;font-family:'Syne',sans-serif;margin:12px 0;}
+.protocolo-text{font-size:13px;opacity:0.9;line-height:1.6;}
+
+/* UPLOAD */
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:16px;text-align:center;color:var(--text-muted);font-size:12px;cursor:pointer;transition:border 0.15s;}
+.upload-area:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ANONYMITY TOGGLE */
+.anon-toggle{display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-light);border:1px solid #b6e6d4;border-radius:var(--radius-sm);margin-bottom:16px;}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:12px;cursor:pointer;transition:0.3s;}
+.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;}
+input:checked+.toggle-slider{background:var(--green);}
+input:checked+.toggle-slider:before{transform:translateX(20px);}
+.anon-text{font-size:12px;color:var(--green-dark);line-height:1.4;}
+.anon-text strong{display:block;font-weight:700;margin-bottom:2px;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius);padding:24px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:4px;font-family:'Syne',sans-serif;}
+.modal-sub{font-size:12px;color:var(--text-muted);margin-bottom:16px;}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.modal-stat{background:var(--bg);border-radius:var(--radius-sm);padding:10px;}
+.modal-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;}
+.modal-stat-val{font-size:18px;font-weight:700;font-family:'Syne',sans-serif;}
+
+@media(max-width:900px){
+  .map-layout{grid-template-columns:1fr;height:auto;}
+  .map-wrap{height:380px;}
+  .map-sidebar{height:220px;}
+  .state-layout{grid-template-columns:1fr;}
+  .state-nav{height:200px;overflow-x:auto;display:flex;flex-direction:row;}
+  .state-btn{white-space:nowrap;}
+  .ag-kpis{grid-template-columns:repeat(2,1fr);}
+  .denuncia-layout{grid-template-columns:1fr;}
+  .tipo-grid{grid-template-columns:repeat(2,1fr);}
+  .form-row{grid-template-columns:1fr;}
+  .topbar-metrics{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="logo">BLO<span>Monitor</span></div>
+      <div class="tagline">Banking Labor Observatory · Worker Mental Health</div>
+    </div>
+  </div>
+  <div class="topbar-metrics">
+    <div class="tb-metric"><div class="tb-val">1,200,000</div><div class="tb-lbl">Workers</div></div>
+    <div class="tb-metric"><div class="tb-val" style="color:#FF8080;">63%</div><div class="tb-lbl">Avg. Burnout</div></div>
+    <div class="tb-metric"><div class="tb-val" style="color:#FFCC60;" id="tb-den">0</div><div class="tb-lbl">Reports Today</div></div>
+    <div class="tb-metric"><div class="tb-val" style="color:#FF6060;">8</div><div class="tb-lbl">Active Alerts</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="https://betterbanks.org/" target="_blank" rel="noopener"
+       style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:99px;padding:5px 13px;font-size:12px;color:#fff;text-decoration:none;font-weight:600;transition:background 0.15s;"
+       onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      🔗 betterbanks.org
+    </a>
+    <div class="live-badge"><div class="live-dot"></div>Live Data</div>
+  </div>
+</div>
+
+<div class="main-nav">
+  <button class="nav-btn active" onclick="showSection('mapa',this)">🗺️ Map</button>
+  <button class="nav-btn" onclick="showSection('states',this)">🏦 Branches by State</button>
+  <button class="nav-btn" onclick="showSection('painel',this)">📊 Health Dashboard</button>
+  <button class="nav-btn denuncia-btn" onclick="showSection('denuncia',this)">🚨 File a Report</button>
+  <button class="nav-btn" onclick="showSection('denuncias-list',this)">📋 Reports Received</button>
+  <button class="nav-btn" onclick="showSection('alimentar',this)">📝 Submit Data</button>
+  <button class="nav-btn" onclick="showSection('ag999',this)" style="background:linear-gradient(135deg,#0F3360,#1B4F8A);color:#fff;border-color:#1B4F8A;font-weight:700;">⚡ AG-999 Engine</button>
+</div>
+
+<div class="sections">
+
+<!-- ==================== MAPA ==================== -->
+<div id="sec-mapa" class="section active">
+  <div class="section-header">
+    <h2>🗺️ Map de Saúde Bancária — Brasil</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select class="form-select" style="width:auto;padding:6px 10px;" id="mapFilter" onchange="filterMap()">
+        <option value="all">All status</option>
+        <option value="critical">Critical only</option>
+        <option value="warning">Warning only</option>
+        <option value="moderate">Moderate only</option>
+      </select>
+      <button class="btn-danger" style="padding:6px 16px;font-size:12px;" onclick="showSection('denuncia',document.querySelector('.denuncia-btn'))">🚨 File a Report</button>
+    </div>
+  </div>
+  <div class="map-layout">
+    <div class="map-wrap">
+      <div class="map-overlay-title">🏦 Bank Branches · Worker Health</div>
+      <div id="leafletMap"></div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Critical (burnout ≥ 65%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Warning (50–64%)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Moderate (< 50%)</div>
+      </div>
+    </div>
+    <div class="map-sidebar">
+      <div class="sidebar-title">Cities — click for details</div>
+      <div id="cityList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STATES ==================== -->
+<div id="sec-states" class="section">
+  <div class="section-header">
+    <h2>🏦 Bank Branches by State</h2>
+    <span class="badge blue" id="total-agencias-badge">50 states · 85,000+ branches (Source: FDIC / OCC)</span>
+  </div>
+  <div class="state-layout">
+    <div class="state-nav">
+      <div class="state-nav-title">Select a State</div>
+      <div id="stateList"></div>
+    </div>
+    <div class="agencias-painel" id="agenciasPainel">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:400px;color:var(--text-muted);text-align:center;">
+        <div style="font-size:48px;margin-bottom:12px;">🗺️</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Select a state</div>
+        <div style="font-size:13px;">Choose a state on the left to view bank branches and worker health indicators.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAINEL ==================== -->
+<div id="sec-painel" class="section">
+  <div class="section-header"><h2>📊 Health Dashboard — Visão Nacional</h2><span class="badge blue">Updated today</span></div>
+
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;margin-bottom:16px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--red);">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Avg. Burnout Nacional</div>
+      <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--red);">76%</div>
+      <div style="font-size:11px;color:var(--text-faint);">↑ 9% vs. 2023</div>
+      <div style="height:4px;border-radius:2px;background:var(--bg);overflow:hidden;margin-top:8px;"><div style="width:63%;height:100%;background:var(--red);border-radius:2px;"></div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--red);">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Monthly Absences</div>
+      <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--red);">125,000+</div>
+      <div style="font-size:11px;color:var(--text-faint);">Mental health conditions</div>
+      <div style="font-size:10px;color:var(--red);margin-top:6px;font-weight:600;">↑ +300% since 2017</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--amber);">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Target Pressure Score</div>
+      <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--amber);">71/100</div>
+      <div style="font-size:11px;color:var(--text-faint);">High pressure level</div>
+      <div style="height:4px;border-radius:2px;background:var(--bg);overflow:hidden;margin-top:8px;"><div style="width:71%;height:100%;background:var(--amber);border-radius:2px;"></div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--amber);">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Reports Received</div>
+      <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--amber);" id="painel-den-count">0</div>
+      <div style="font-size:11px;color:var(--text-faint);">via BLO platform</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--red);">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Psychotropic Medication</div>
+      <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--red);">27%</div>
+      <div style="font-size:11px;color:var(--text-faint);">Sector estimate</div>
+      <div style="height:4px;border-radius:2px;background:var(--bg);overflow:hidden;margin-top:8px;"><div style="width:27%;height:100%;background:var(--red);border-radius:2px;"></div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--red);">
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Internal NPS National</div>
+      <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--red);">-18</div>
+      <div style="font-size:11px;color:var(--text-faint);">Critical zone</div>
+      <div style="font-size:10px;color:var(--red);margin-top:6px;font-weight:600;">Below zero = dissatisfaction</div>
+    </div>
+  </div>
+
+  <!-- MÉDIA NACIONAL DESTAQUE -->
+  <div style="background:linear-gradient(135deg,#0F3360,#1B4F8A);border-radius:var(--radius);padding:18px 22px;margin-bottom:16px;display:grid;grid-template-columns:1fr repeat(5,auto);align-items:center;gap:20px;box-shadow:var(--shadow);">
+    <div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">📊 National Average — All indicators</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.5;">Data from 20 monitored cities · Source: CWA / BLS / SAMHSA</div>
+    </div>
+    <div style="text-align:center;"><div style="font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:#FF8080;">76%</div><div style="font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;">Burnout</div></div>
+    <div style="text-align:center;"><div style="font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:#FFBB60;">71</div><div style="font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;">Pressure</div></div>
+    <div style="text-align:center;"><div style="font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:#FF8080;">11.2%</div><div style="font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;">Absences</div></div>
+    <div style="text-align:center;"><div style="font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:#FFBB60;">-18</div><div style="font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;">NPS</div></div>
+    <div style="text-align:center;"><div style="font-size:22px;font-weight:800;font-family:'Syne',sans-serif;color:#FF8080;">52</div><div style="font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;">Harassment/mo</div></div>
+  </div>
+
+  <!-- GRÁFICO BURNOUT PRINCIPAL -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+      <div>
+        <div style="font-size:14px;font-weight:700;">Burnout Index — National Trend</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">% of workers with burnout symptoms · city vs. national average</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <span class="badge red">SP: 78%</span>
+        <span class="badge blue">National: 76%</span>
+        <span class="badge amber">POA: 59%</span>
+        <span class="badge green">FLN: 46%</span>
+      </div>
+    </div>
+    <canvas id="chartBurnout" height="85"></canvas>
+  </div>
+
+  <!-- GRÁFICOS LINHA 2 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Absences by Region</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Monthly mental health absences</div>
+      <canvas id="chartRegiao" height="180"></canvas>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Distribution by Bank</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">% of absences by institution</div>
+      <canvas id="chartBanco" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS LINHA 3 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Absence Types</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Distribution by diagnostic category (ICD)</div>
+      <canvas id="chartDiag" height="180"></canvas>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Harassment Reports — Trend</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Monthly records: harassment and target pressure</div>
+      <canvas id="chartAssedio" height="180"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DENÚNCIA ==================== -->
+<div id="sec-denuncia" class="section">
+  <div class="section-header">
+    <h2>🚨 File a Report</h2>
+    <span class="badge red">Secure and confidential channel</span>
+  </div>
+  <div class="denuncia-layout">
+    <div class="denuncia-form-card">
+
+      <!-- STEPS -->
+      <div class="steps" id="stepsBar">
+        <div class="step active" id="step-ind-1"><div class="step-circle">1</div><span class="step-label">Tipo</span></div>
+        <div class="step" id="step-ind-2"><div class="step-circle">2</div><span class="step-label">Detalhes</span></div>
+        <div class="step" id="step-ind-3"><div class="step-circle">3</div><span class="step-label">Evidências</span></div>
+        <div class="step" id="step-ind-4"><div class="step-circle">4</div><span class="step-label">Enviar</span></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="step-content active" id="sc1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text);">What type of report?<span style="color:var(--red);margin-left:3px;">*</span></div>
+        <div class="tipo-grid" id="tipoGrid">
+          <div class="tipo-card" onclick="selectTipo(this,'assedio-moral')">
+            <div class="tipo-icon">😰</div>
+            <div class="tipo-label">Workplace Harassment</div>
+            <div class="tipo-sub">Humiliation, threats, abusive pressure</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'assedio-sexual')">
+            <div class="tipo-icon">🚫</div>
+            <div class="tipo-label">Sexual Harassment</div>
+            <div class="tipo-sub">Unwanted conduct, abuse</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'metas-abusivas')">
+            <div class="tipo-icon">📊</div>
+            <div class="tipo-label">Abusive Targets</div>
+            <div class="tipo-sub">Excessive pressure, unlawful demands</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'saude-mental')">
+            <div class="tipo-icon">🧠</div>
+            <div class="tipo-label">Mental Health</div>
+            <div class="tipo-sub">Burnout, collapse, employer negligence</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'horas-extras')">
+            <div class="tipo-icon">⏰</div>
+            <div class="tipo-label">Illegal Work Hours</div>
+            <div class="tipo-sub">Unpaid overtime, excessive hours</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'discriminacao')">
+            <div class="tipo-icon">⚖️</div>
+            <div class="tipo-label">Discrimination</div>
+            <div class="tipo-sub">Race, gender, age, religion</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'demissao-represalia')">
+            <div class="tipo-icon">✂️</div>
+            <div class="tipo-label">Retaliatory Termination</div>
+            <div class="tipo-sub">Fired for reporting or complaining</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'fraude-interna')">
+            <div class="tipo-icon">🔍</div>
+            <div class="tipo-label">Internal Fraud</div>
+            <div class="tipo-sub">Irregularity, misconduct, internal corruption</div>
+          </div>
+          <div class="tipo-card" onclick="selectTipo(this,'outro')">
+            <div class="tipo-icon">📝</div>
+            <div class="tipo-label">Other</div>
+            <div class="tipo-sub">Situation not listed above</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Severity of the situation:</div>
+        <div class="grav-row" id="gravRow">
+          <div class="grav-btn" onclick="selectGrav(this,'leve','sel')">🟡 Concerning situation</div>
+          <div class="grav-btn" onclick="selectGrav(this,'moderada','sel-amber')">🟠 Serious — already affecting health</div>
+          <div class="grav-btn" onclick="selectGrav(this,'critica','sel-red')">🔴 Critical — immediate risk</div>
+        </div>
+        <div class="btn-row" style="margin-top:20px;">
+          <button class="btn-primary" onclick="goStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-content" id="sc2">
+        <div class="anon-toggle">
+          <label class="toggle-switch">
+            <input type="checkbox" id="anonToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="anon-text">
+            <strong>🔒 Anonymous Report Enabled</strong>
+            Your personal data will not be collected or stored. The union receives only the report content.
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">State<span>*</span></label>
+            <select class="form-select" id="d-state" onchange="populateDCities()">
+              <option value="">Select...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City<span>*</span></label>
+            <select class="form-select" id="d-city"><option value="">Select a state first</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Bank / Institution<span>*</span></label>
+            <select class="form-select" id="d-bank">
+              <option value="">Select...</option>
+              <option>JPMorgan Chase</option><option>Bank of America</option>
+              <option>Wells Fargo</option><option>Citibank</option><option>US Bancorp</option>
+              <option>Regions Bank</option><option>Sicoob</option><option>Sicredi</option>
+              <option>Nubank / Fintech</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Victim's Position</label>
+            <select class="form-select" id="d-cargo">
+              <option value="">Prefer not to say</option>
+              <option>Teller / Customer Service</option><option>Account Manager</option>
+              <option>Branch Manager</option><option>Analyst</option>
+              <option>Supervisor</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Describe the situation in detail<span>*</span></label>
+          <textarea class="form-textarea" id="d-descricao" style="min-height:130px;" placeholder="Ex: The regional manager holds weekly meetings where they publicly humiliate employees who didn't meet targets. In the last meeting (04/15), they called a colleague 'useless' in front of 12 coworkers. This has been happening for at least 6 months..."></textarea>
+          <div class="form-hint">The more detailed, the more effective union action can be. Do not include your name if you want to remain anonymous.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Period when it occurred / is occurring</label>
+          <div class="form-row">
+            <input type="month" class="form-input" id="d-inicio" placeholder="Início">
+            <input type="month" class="form-input" id="d-fim" placeholder="End (leave blank if still ongoing)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Number of workers affected (estimate)</label>
+          <select class="form-select" id="d-afetados">
+            <option>Just me / 1 person</option>
+            <option>2 to 5 people</option><option>6 to 15 people</option>
+            <option>16 to 50 people</option><option>Entire branch / more than 50</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goStep(1)">← Back</button>
+          <button class="btn-primary" onclick="goStep(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-content" id="sc3">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Evidence (optional but recommended)</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Documents greatly strengthen union and legal action.</div>
+
+        <div class="form-group">
+          <label class="form-label">Type of evidence available</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;" id="evidGrid">
+            <div class="grav-btn" onclick="toggleEv(this)">📱 Text/Chat screenshots</div>
+            <div class="grav-btn" onclick="toggleEv(this)">📧 Emails</div>
+            <div class="grav-btn" onclick="toggleEv(this)">🎙️ Audio recordings</div>
+            <div class="grav-btn" onclick="toggleEv(this)">📹 Videos</div>
+            <div class="grav-btn" onclick="toggleEv(this)">👥 Witnesses</div>
+            <div class="grav-btn" onclick="toggleEv(this)">📄 Internal documents</div>
+            <div class="grav-btn" onclick="toggleEv(this)">🏥 Medical records</div>
+            <div class="grav-btn" onclick="toggleEv(this)">📊 Target spreadsheets</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Attach a file</label>
+          <div class="upload-area" onclick="alert('Upload active in production — connects to secure union server.')">
+            📎 Click to attach · PDF, image, audio, document — max 50MB<br>
+            <span style="font-size:10px;color:var(--text-faint);">Files are encrypted and accessible only by the union</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Have you tried to resolve this internally?</label>
+          <select class="form-select" id="d-tentou">
+            <option>I haven't tried — I fear retaliation</option>
+            <option>I tried and was ignored</option>
+            <option>I tried and the situation got worse</option>
+            <option>I tried and received an unsatisfactory response</option>
+            <option>Yes, there was partial resolution</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">What outcome do you expect?</label>
+          <select class="form-select" id="d-expectativa">
+            <option>Formal union investigation</option>
+            <option>Notification to DOL / NLRB</option>
+            <option>Collective bargaining with the bank</option>
+            <option>Individual legal guidance</option>
+            <option>Just recording for statistics</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goStep(2)">← Back</button>
+          <button class="btn-primary" onclick="goStep(4)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-content" id="sc4">
+        <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Review and submit</div>
+        <div id="resumoDenuncia" style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8;"></div>
+        <div style="background:var(--blue-light);border:1px solid #c4d8f5;border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--blue-dark);margin-bottom:16px;">
+          ℹ️ <strong>Upon submission</strong> you will receive a protocol code to track your report. The union responsible for your region will have access within 24 hours. Your anonymity is guaranteed by our zero personal data policy.
+        </div>
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goStep(3)">← Back</button>
+          <button class="btn-danger" onclick="enviarDenuncia()">🚨 Submit Report Now</button>
+        </div>
+        <div id="protocoloBox" style="display:none;"></div>
+      </div>
+
+    </div><!-- /denuncia-form-card -->
+
+    <!-- SIDEBAR REPORT -->
+    <div class="denuncia-sidebar">
+      <div class="denuncia-aviso">
+        <div class="denuncia-aviso-title">🔒 Your safety is our priority</div>
+        <div class="denuncia-aviso-text">
+          ✅ 100% anonymous reports by default<br>
+          ✅ Zero personal data collected<br>
+          ✅ End-to-end encryption<br>
+          ✅ Restricted union access only<br>
+          ✅ Compliant with US privacy law<br><br>
+          The NLRA and whistleblower protection laws protect reporters from retaliation. The union can take protective action if necessary.
+        </div>
+      </div>
+      <div class="denuncia-stats">
+        <div class="denuncia-stats-title">Reports this week</div>
+        <div class="ds-row"><span>🔴 Workplace Harassment</span><div class="ds-num" id="cnt-am">0</div></div>
+        <div class="ds-row"><span>📊 Abusive Targets</span><div class="ds-num" id="cnt-ma">0</div></div>
+        <div class="ds-row"><span>🧠 Mental Health</span><div class="ds-num" id="cnt-sm">0</div></div>
+        <div class="ds-row"><span>⏰ Illegal Work Hours</span><div class="ds-num" id="cnt-ji">0</div></div>
+        <div class="ds-row"><span>📋 Total</span><div class="ds-num" id="cnt-tot">0</div></div>
+      </div>
+      <div class="denuncia-recentes">
+        <div class="dr-title">Recent Reports (anon.)</div>
+        <div id="recentesList">
+          <div class="dr-item"><div class="dr-tipo">Workplace Harassment</div><div class="dr-city">New York, NY · JPMorgan Chase</div><div class="dr-texto">Public humiliation in sales target meeting with 20+ employees present.</div><div class="dr-data">Today 08:32 · Critical</div></div>
+          <div class="dr-item crit"><div class="dr-tipo">Abusive Targets</div><div class="dr-city">Houston, TX · Wells Fargo</div><div class="dr-texto">Demands via text on weekends. Threats of termination for missing targets.</div><div class="dr-data">Yesterday 15:18 · Critical</div></div>
+          <div class="dr-item"><div class="dr-tipo">Mental Health</div><div class="dr-city">Charlotte, NC · Bank of America</div><div class="dr-texto">3 simultaneous medical leaves with no action taken by management.</div><div class="dr-data">Yesterday 11:00 · Serious</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== LISTA DENÚNCIAS ==================== -->
+<div id="sec-denuncias-list" class="section">
+  <div class="section-header">
+    <h2>📋 Reports Received</h2>
+    <div style="display:flex;gap:8px;">
+      <select class="form-select" style="width:auto;padding:6px 10px;" id="dl-filter" onchange="renderDenunciaList()">
+        <option value="all">All types</option>
+        <option value="assedio-moral">Workplace Harassment</option>
+        <option value="metas-abusivas">Abusive Targets</option>
+        <option value="saude-mental">Mental Health</option>
+        <option value="horas-extras">Illegal Work Hours</option>
+        <option value="assedio-sexual">Sexual Harassment</option>
+        <option value="discriminacao">Discrimination</option>
+      </select>
+      <select class="form-select" style="width:auto;padding:6px 10px;" id="dl-grav" onchange="renderDenunciaList()">
+        <option value="all">All severities</option>
+        <option value="critica">Critical</option>
+        <option value="moderada">Serious / Moderate</option>
+        <option value="leve">Concerning</option>
+      </select>
+    </div>
+  </div>
+  <div id="denunciaListContainer">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px;text-align:center;color:var(--text-muted);box-shadow:var(--shadow);">
+      <div style="font-size:40px;margin-bottom:10px;">📋</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">No reports yet</div>
+      <div style="font-size:13px;">Reports submitted through the platform will appear here for union review.</div>
+      <button class="btn-danger" style="margin-top:16px;" onclick="showSection('denuncia',document.querySelector('.denuncia-btn'))">🚨 File First Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DATA FEED ==================== -->
+<div id="sec-alimentar" class="section">
+  <div class="section-header">
+    <h2>📝 Submit Data Sindicais</h2>
+    <span class="badge blue">Access: Union delegates</span>
+  </div>
+  <div style="background:var(--blue-light);border:1px solid #c4d8f5;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--blue-dark);">
+    ℹ️ Fill in data for your branch/region. Information is aggregated — never identify workers individually.
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--blue-light);">🏦 Identification</div>
+      <div class="form-group"><label class="form-label">Union<span>*</span></label><select class="form-select" id="f-union"><option value="">Select...</option><option>CWA District 1</option><option>CWA District 2</option><option>CWA District 4</option><option>CWA District 6</option><option>Committee for Better Banks</option><option>Other</option></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Bank<span>*</span></label><select class="form-select" id="f-bank"><option value="">Select...</option><option>JPMorgan Chase</option><option>Bank of America</option><option>Wells Fargo</option><option>Citibank</option><option>US Bancorp</option><option>Regions Bank</option><option>Other</option></select></div>
+        <div class="form-group"><label class="form-label">City<span>*</span></label><input type="text" class="form-input" id="f-city" placeholder="Ex: New York, NY"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Período<span>*</span></label><input type="month" class="form-input" id="f-periodo"></div>
+        <div class="form-group"><label class="form-label">No. of Workers<span>*</span></label><input type="number" class="form-input" id="f-workers" placeholder="Ex: 500" min="1"></div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--blue-light);">🧠 Health Indicators</div>
+      <div class="form-group"><label class="form-label">Burnout Cases (month)</label><input type="number" class="form-input" id="f-burnout" placeholder="Ex: 45" min="0"></div>
+      <div class="form-group"><label class="form-label">Absences Mental Health (mês)</label><input type="number" class="form-input" id="f-absences" placeholder="Ex: 28" min="0"></div>
+      <div class="form-group"><label class="form-label">Harassment Reports (month)</label><input type="number" class="form-input" id="f-assedio" placeholder="Ex: 12" min="0"></div>
+      <div class="form-group"><label class="form-label">Target Pressure Score (0–100)</label><div style="display:flex;align-items:center;gap:12px;"><input type="range" id="f-pressao" min="0" max="100" value="70" oninput="document.getElementById('f-pres-val').textContent=this.value"><span style="font-size:14px;font-weight:700;color:var(--blue);min-width:35px;" id="f-pres-val">70</span></div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);grid-column:span 2;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--blue-light);">📋 Notes</div>
+      <textarea class="form-textarea" id="f-observacoes" placeholder="Describe critical situations, union actions taken, context..."></textarea>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn-primary" onclick="submitFeed()">✅ Submit Report</button>
+        <div style="display:none;background:var(--green-light);color:var(--green-dark);border:1px solid #b6e6d4;border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;font-weight:600;" id="feed-success">✔ Data submitted successfully!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /sections -->
+
+<!-- ==================== AG-999 ==================== -->
+<div id="sec-ag999" class="section">
+  <div class="section-header">
+    <div>
+      <h2>⚡ AG-999 Calculation Engine — Banking Health</h2>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Formulas 04A · 06A · Systemic Pressure Index — Proprietary integrated engine</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="background:linear-gradient(135deg,#0F3360,#2E6BB5);color:#fff;padding:4px 12px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:0.06em;">© AG-999 · INTELLECTUAL PROPERTY</span>
+    </div>
+  </div>
+
+  <!-- AVISO IP -->
+  <div style="background:linear-gradient(135deg,#0F3360,#1B4F8A);color:#fff;border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+    <div style="font-size:28px;">🔒</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:3px;">Intellectual Property Protected — AG-999 Framework</div>
+      <div style="font-size:11px;opacity:0.85;line-height:1.6;">This calculation engine uses AG-999 Formulas (04A and 06A) developed by <strong>Cesar Agliardi Pereira / SilentSystem999</strong>. Reproduction, copying, adaptation or redistribution without express authorization is prohibited under US and international intellectual property law. Use authorized exclusively by the Banking Labor Observatory.</div>
+      <div style="margin-top:10px;padding:8px 12px;background:rgba(255,255,255,0.08);border-radius:6px;border-left:3px solid rgba(255,255,255,0.3);">
+        <div style="font-size:9px;opacity:0.55;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:4px;">Linked Work · SHA-256 Prior Art Hash</div>
+        <div style="font-family:'Courier New',monospace;font-size:11px;color:rgba(255,255,255,0.8);letter-spacing:0.04em;word-break:break-all;">bbe47fa849c18e6d7d8b67ec6148c4efa4a724e7ba4c7a94bac6151fbca391a5</div>
+        <div style="font-size:9px;opacity:0.45;margin-top:4px;">Mental Health no Sistema Financeiro e o Custo Invisível do Lucro · Cesar Agliardi Pereira / SilentSystem999</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+    <!-- FÓRMULA 04A -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:15px;font-weight:800;font-family:'Syne',sans-serif;color:var(--blue-dark);">Formula 04A</div>
+          <div style="font-size:11px;color:var(--text-muted);">Banking Psychosocial Risk Index (BPRI)</div>
+        </div>
+        <span style="background:var(--blue-light);color:var(--blue-dark);padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;">AG-999</span>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-family:monospace;font-size:12px;color:var(--blue-dark);margin-bottom:16px;border-left:3px solid var(--blue);">
+        BPRI = (P × 0.35) + (A × 0.25) + (B × 0.20) + (H × 0.12) + (D × 0.08)
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;">
+        <strong>P</strong> = Target pressure (0–100) &nbsp;·&nbsp; <strong>A</strong> = Normalized harassment &nbsp;·&nbsp; <strong>B</strong> = Burnout % &nbsp;·&nbsp; <strong>H</strong> = Overtime hrs/wk &nbsp;·&nbsp; <strong>D</strong> = Reports/month
+      </div>
+      <div class="form-group"><label class="form-label">Target Pressure (P)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p04-P" min="0" max="100" value="70" oninput="calc04A()"><span id="v04-P" style="font-weight:700;color:var(--blue);min-width:32px;">70</span></div></div>
+      <div class="form-group"><label class="form-label">Normalized Harassment (A) — reports/10</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p04-A" min="0" max="100" value="45" oninput="calc04A()"><span id="v04-A" style="font-weight:700;color:var(--blue);min-width:32px;">45</span></div></div>
+      <div class="form-group"><label class="form-label">Burnout % (B)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p04-B" min="0" max="100" value="63" oninput="calc04A()"><span id="v04-B" style="font-weight:700;color:var(--blue);min-width:32px;">63</span></div></div>
+      <div class="form-group"><label class="form-label">Overtime Hours/Week normalized (H)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p04-H" min="0" max="100" value="40" oninput="calc04A()"><span id="v04-H" style="font-weight:700;color:var(--blue);min-width:32px;">40</span></div></div>
+      <div class="form-group"><label class="form-label">Reports/Month normalized (D)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p04-D" min="0" max="100" value="30" oninput="calc04A()"><span id="v04-D" style="font-weight:700;color:var(--blue);min-width:32px;">30</span></div></div>
+      <div id="resultado04A" style="background:linear-gradient(135deg,var(--blue-dark),var(--blue));border-radius:var(--radius-sm);padding:16px;color:#fff;text-align:center;margin-top:8px;">
+        <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">BPRI — Banking Psychosocial Risk Index</div>
+        <div id="bpri-val" style="font-size:36px;font-weight:800;font-family:'Syne',sans-serif;">61.6</div>
+        <div id="bpri-class" style="font-size:12px;margin-top:4px;opacity:.85;">🔴 HIGH RISK — Urgent intervention</div>
+      </div>
+    </div>
+
+    <!-- FÓRMULA 06A -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:15px;font-weight:800;font-family:'Syne',sans-serif;color:var(--blue-dark);">Formula 06A</div>
+          <div style="font-size:11px;color:var(--text-muted);">Systemic Pressure Index (SPI) — Crisis cycle</div>
+        </div>
+        <span style="background:var(--blue-light);color:var(--blue-dark);padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;">AG-999</span>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-family:monospace;font-size:12px;color:var(--blue-dark);margin-bottom:16px;border-left:3px solid var(--blue);">
+        SPI = BPRI × (1 + α·Δt) × e^(β·R)
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;">
+        <strong>BPRI</strong> = Formula 04A result &nbsp;·&nbsp; <strong>α</strong> = crisis acceleration rate &nbsp;·&nbsp; <strong>Δt</strong> = meses sem intervenção &nbsp;·&nbsp; <strong>β</strong> = coeficiente de resiliência &nbsp;·&nbsp; <strong>R</strong> = score de suporte institucional (0–1)
+      </div>
+      <div class="form-group"><label class="form-label">α — Acceleration Rate (0.0 – 0.5)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p06-alpha" min="0" max="50" value="15" oninput="calc06A()"><span id="v06-alpha" style="font-weight:700;color:var(--blue);min-width:40px;">0.15</span></div></div>
+      <div class="form-group"><label class="form-label">Δt — Months without intervention</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p06-dt" min="0" max="24" value="6" oninput="calc06A()"><span id="v06-dt" style="font-weight:700;color:var(--blue);min-width:32px;">6</span></div></div>
+      <div class="form-group"><label class="form-label">β — Resilience Coefficient (0.0 – 0.3)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p06-beta" min="0" max="30" value="10" oninput="calc06A()"><span id="v06-beta" style="font-weight:700;color:var(--blue);min-width:40px;">0.10</span></div></div>
+      <div class="form-group"><label class="form-label">R — Institutional Support (0 = none, 1 = full)</label><div style="display:flex;align-items:center;gap:10px;"><input type="range" id="p06-R" min="0" max="100" value="20" oninput="calc06A()"><span id="v06-R" style="font-weight:700;color:var(--blue);min-width:40px;">0.20</span></div></div>
+      <div id="resultado06A" style="background:linear-gradient(135deg,#5B0000,#D62828);border-radius:var(--radius-sm);padding:16px;color:#fff;text-align:center;margin-top:8px;">
+        <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">SPI — Systemic Pressure Index</div>
+        <div id="spi-val" style="font-size:36px;font-weight:800;font-family:'Syne',sans-serif;">—</div>
+        <div id="spi-class" style="font-size:12px;margin-top:4px;opacity:.85;">Calculate BPRI first (Formula 04A)</div>
+      </div>
+    </div>
+
+    <!-- COMPARATIVE CALCULATOR -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);grid-column:span 2;">
+      <div style="font-size:15px;font-weight:800;font-family:'Syne',sans-serif;color:var(--blue-dark);margin-bottom:4px;">📊 Branch Comparison — AG-999 Engine</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">Apply Formula 04A to monitored branches and compare risks automatically</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;" id="ag999Table">
+          <thead>
+            <tr>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">City</th>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">State</th>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">BPRI (04A)</th>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Risk</th>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Burnout</th>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Pressure</th>
+              <th style="background:var(--blue-dark);color:#fff;padding:10px 14px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="ag999Tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;font-size:10px;color:var(--text-faint);text-align:right;">
+        ⚡ Cálculo via Formula 04A AG-999 © César / SilentSystem999 — Todos os direitos reservados
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</div><!-- /sec-ag999 -->
+
+<!-- CITY MODAL -->
+<div class="modal-overlay" id="cityModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('cityModal').classList.remove('open')">✕</button>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="modal-grid" id="modal-grid"></div>
+    <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;" id="modal-obs"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-danger" style="font-size:12px;padding:8px 16px;" onclick="document.getElementById('cityModal').classList.remove('open');showSection('denuncia',document.querySelector('.denuncia-btn'))">🚨 Report from this city</button>
+      <button class="btn-secondary" onclick="document.getElementById('cityModal').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const agencias = [
+  {id:1,city:'New York',state:'NY',lat:40.7128,lng:-74.0060,bank:'JPMorgan Chase / Multiple',workers:89000,burnout:79,absences:14.8,harassment:198,pressure:91,satisfaction:-31,status:'critical'},
+  {id:2,city:'Charlotte',state:'NC',lat:35.2271,lng:-80.8431,bank:'Bank of America / Wells Fargo',workers:54000,burnout:74,absences:12.3,harassment:142,pressure:84,satisfaction:-22,status:'critical'},
+  {id:3,city:'Houston',state:'TX',lat:29.7604,lng:-95.3698,bank:'JPMorgan Chase / Multiple',workers:38000,burnout:72,absences:11.9,harassment:109,pressure:82,satisfaction:-19,status:'critical'},
+  {id:4,city:'Atlanta',state:'GA',lat:33.7490,lng:-84.3880,bank:'Truist / Multiple',workers:31000,burnout:74,absences:11.6,harassment:96,pressure:81,satisfaction:-18,status:'critical'},
+  {id:5,city:'Chicago',state:'IL',lat:41.8781,lng:-87.6298,bank:'Multiple',workers:42000,burnout:68,absences:10.5,harassment:87,pressure:77,satisfaction:-14,status:'warning'},
+  {id:6,city:'Dallas',state:'TX',lat:32.7767,lng:-96.7970,bank:'Multiple',workers:31000,burnout:65,absences:9.8,harassment:74,pressure:74,satisfaction:-10,status:'warning'},
+  {id:7,city:'San Francisco',state:'CA',lat:37.7749,lng:-122.4194,bank:'Wells Fargo / Multiple',workers:29000,burnout:71,absences:11.4,harassment:88,pressure:80,satisfaction:-17,status:'critical'},
+  {id:8,city:'Miami',state:'FL',lat:25.7617,lng:-80.1918,bank:'Multiple',workers:21000,burnout:69,absences:10.7,harassment:71,pressure:78,satisfaction:-15,status:'warning'},
+  {id:9,city:'Boston',state:'MA',lat:42.3601,lng:-71.0589,bank:'State Street / Multiple',workers:29000,burnout:67,absences:10.2,harassment:79,pressure:76,satisfaction:-12,status:'warning'},
+  {id:10,city:'Phoenix',state:'AZ',lat:33.4484,lng:-112.0740,bank:'Multiple',workers:24000,burnout:66,absences:9.9,harassment:63,pressure:75,satisfaction:-11,status:'warning'},
+  {id:11,city:'Columbus',state:'OH',lat:39.9612,lng:-82.9988,bank:'JPMorgan / Huntington',workers:22000,burnout:61,absences:8.7,harassment:52,pressure:69,satisfaction:-4,status:'warning'},
+  {id:12,city:'Denver',state:'CO',lat:39.7392,lng:-104.9903,bank:'Multiple',workers:13000,burnout:47,absences:6.2,harassment:22,pressure:54,satisfaction:19,status:'moderate'},
+  {id:13,city:'Portland',state:'OR',lat:45.5051,lng:-122.6750,bank:'US Bancorp / Multiple',workers:9800,burnout:44,absences:5.9,harassment:17,pressure:51,satisfaction:24,status:'moderate'},
+  {id:14,city:'Seattle',state:'WA',lat:47.6062,lng:-122.3321,bank:'Multiple',workers:17000,burnout:58,absences:7.9,harassment:41,pressure:66,satisfaction:3,status:'warning'},
+  {id:15,city:'Nashville',state:'TN',lat:36.1627,lng:-86.7816,bank:'Multiple',workers:14000,burnout:63,absences:9.3,harassment:55,pressure:72,satisfaction:-7,status:'warning'},
+  {id:16,city:'Minneapolis',state:'MN',lat:44.9778,lng:-93.2650,bank:'US Bancorp / Multiple',workers:19000,burnout:57,absences:7.4,harassment:38,pressure:65,satisfaction:6,status:'warning'},
+  {id:17,city:'Pittsburgh',state:'PA',lat:40.4406,lng:-79.9959,bank:'PNC / Multiple',workers:16000,burnout:60,absences:8.5,harassment:48,pressure:68,satisfaction:-2,status:'warning'},
+  {id:18,city:'Salt Lake City',state:'UT',lat:40.7608,lng:-111.8910,bank:'Zions / Multiple',workers:8200,burnout:43,absences:5.6,harassment:14,pressure:50,satisfaction:26,status:'moderate'},
+  {id:19,city:'Kansas City',state:'MO',lat:39.0997,lng:-94.5786,bank:'Multiple',workers:11000,burnout:55,absences:7.5,harassment:31,pressure:63,satisfaction:4,status:'warning'},
+  {id:20,city:'Baltimore',state:'MD',lat:39.2904,lng:-76.6122,bank:'Multiple',workers:12500,burnout:62,absences:8.9,harassment:44,pressure:71,satisfaction:-6,status:'warning'},
+];
+
+// Real branches by state
+const totalPorState = {
+  'CA':11000,'TX':9800,'NY':9200,'FL':8600,'IL':5400,'PA':4200,'OH':4100,
+  'GA':3900,'NC':3700,'MI':3400,'NJ':3200,'VA':3100,'WA':2900,'AZ':2800,
+  'MA':2700,'TN':2500,'MO':2300,'IN':2200,'MD':2100,'CO':2000,
+  'MN':1900,'WI':1800,'SC':1700,'AL':1500,'KY':1400,'OR':1400,
+  'CT':1300,'OK':1200,'IA':1100,'MS':1000,'NV':980,'AR':920,'KS':880,
+  'UT':840,'NE':780,'NM':650,'WV':580,'ID':520,'HI':480,'NH':420,
+  'ME':380,'MT':320,'RI':310,'DE':290,'SD':260,'ND':240,'AK':210,
+  'VT':190,'WY':170,'DC':850
+};
+
+const agenciasPorState = {
+  'NY':{name:'New York',branches:[
+    {name:'JPMorgan Chase — Midtown',address:'270 Park Ave, Midtown — New York, NY',bank:'JPMorgan Chase',burnout:81,status:'critical'},
+    {name:'Wells Fargo — Fifth Ave',address:'454 Fifth Ave, Midtown — New York, NY',bank:'Wells Fargo',burnout:78,status:'critical'},
+    {name:'Citibank — Wall Street',address:'388 Greenwich St, Downtown — New York, NY',bank:'Citibank',burnout:76,status:'critical'},
+    {name:'Bank of America — Rockefeller Center',address:'1221 Ave of the Americas — New York, NY',bank:'Bank of America',burnout:74,status:'critical'},
+    {name:'TD Bank — Union Square',address:'875 Broadway, Union Square — New York, NY',bank:'TD Bank',burnout:68,status:'warning'},
+    {name:'Chase — Brooklyn Heights',address:'177 Montague St — Brooklyn, NY',bank:'JPMorgan Chase',burnout:65,status:'warning'},
+  ]},
+  'CA':{name:'California',branches:[
+    {name:'Wells Fargo — Financial District SF',address:'420 Montgomery St — San Francisco, CA',bank:'Wells Fargo',burnout:79,status:'critical'},
+    {name:'Bank of America — Downtown LA',address:'333 S Hope St — Los Angeles, CA',bank:'Bank of America',burnout:74,status:'critical'},
+    {name:'JPMorgan Chase — Beverly Hills',address:'9401 Wilshire Blvd — Beverly Hills, CA',bank:'JPMorgan Chase',burnout:71,status:'critical'},
+    {name:'US Bank — San Diego',address:'1 Harbor Drive — San Diego, CA',bank:'US Bancorp',burnout:63,status:'warning'},
+    {name:'Citibank — Palo Alto',address:'2300 El Camino Real — Palo Alto, CA',bank:'Citibank',burnout:67,status:'warning'},
+  ]},
+  'TX':{name:'Texas',branches:[
+    {name:'JPMorgan Chase — Houston Downtown',address:'1000 Louisiana St — Houston, TX',bank:'JPMorgan Chase',burnout:72,status:'critical'},
+    {name:'Bank of America — Dallas CBD',address:'901 Main St — Dallas, TX',bank:'Bank of America',burnout:68,status:'warning'},
+    {name:'Wells Fargo — Austin',address:'300 W 6th St — Austin, TX',bank:'Wells Fargo',burnout:64,status:'warning'},
+    {name:'Frost Bank — San Antonio',address:'100 W Houston St — San Antonio, TX',bank:'Frost Bank',burnout:58,status:'warning'},
+    {name:'Regions Bank — Fort Worth',address:'301 Commerce St — Fort Worth, TX',bank:'Regions Bank',burnout:55,status:'warning'},
+  ]},
+  'NC':{name:'North Carolina',branches:[
+    {name:'Bank of America HQ',address:'100 N Tryon St — Charlotte, NC',bank:'Bank of America',burnout:76,status:'critical'},
+    {name:'Wells Fargo — South Tryon',address:'401 S Tryon St — Charlotte, NC',bank:'Wells Fargo',burnout:74,status:'critical'},
+    {name:'Truist — Durham',address:'434 Fayetteville St — Durham, NC',bank:'Truist',burnout:65,status:'warning'},
+    {name:'First Citizens Bank — Raleigh',address:'239 Fayetteville St — Raleigh, NC',bank:'First Citizens',burnout:60,status:'warning'},
+  ]},
+  'GA':{name:'Georgia',branches:[
+    {name:'Truist — Midtown Atlanta',address:'303 Peachtree St NE — Atlanta, GA',bank:'Truist',burnout:74,status:'critical'},
+    {name:'Bank of America — Buckhead',address:'3399 Peachtree Rd NE — Atlanta, GA',bank:'Bank of America',burnout:71,status:'critical'},
+    {name:'Wells Fargo — Downtown Atlanta',address:'190 Peachtree St — Atlanta, GA',bank:'Wells Fargo',burnout:69,status:'warning'},
+    {name:'Regions Bank — Savannah',address:'25 Bull St — Savannah, GA',bank:'Regions Bank',burnout:57,status:'warning'},
+  ]},
+  'FL':{name:'Florida',branches:[
+    {name:'JPMorgan Chase — Brickell',address:'600 Brickell Ave — Miami, FL',bank:'JPMorgan Chase',burnout:71,status:'critical'},
+    {name:'Wells Fargo — Downtown Miami',address:'333 SE 2nd Ave — Miami, FL',bank:'Wells Fargo',burnout:68,status:'warning'},
+    {name:'Bank of America — Tampa',address:'101 E Kennedy Blvd — Tampa, FL',bank:'Bank of America',burnout:64,status:'warning'},
+    {name:'Truist — Orlando',address:'200 S Orange Ave — Orlando, FL',bank:'Truist',burnout:62,status:'warning'},
+    {name:'TD Bank — Fort Lauderdale',address:'200 E Las Olas Blvd — Fort Lauderdale, FL',bank:'TD Bank',burnout:59,status:'warning'},
+  ]},
+  'IL':{name:'Illinois',branches:[
+    {name:'JPMorgan Chase — The Loop',address:'21 S Clark St — Chicago, IL',bank:'JPMorgan Chase',burnout:70,status:'critical'},
+    {name:'Bank of America — Michigan Ave',address:'540 N Michigan Ave — Chicago, IL',bank:'Bank of America',burnout:67,status:'warning'},
+    {name:'Citibank — Chicago Tower',address:'500 W Madison St — Chicago, IL',bank:'Citibank',burnout:63,status:'warning'},
+    {name:'US Bancorp — Springfield',address:'300 S Grand Ave W — Springfield, IL',bank:'US Bancorp',burnout:52,status:'moderate'},
+  ]},
+  'OH':{name:'Ohio',branches:[
+    {name:'JPMorgan Chase — Columbus',address:'8000 Walton Pkwy — Columbus, OH',bank:'JPMorgan Chase',burnout:63,status:'warning'},
+    {name:'KeyBank — Cleveland',address:'127 Public Sq — Cleveland, OH',bank:'KeyBank',burnout:60,status:'warning'},
+    {name:'Fifth Third Bank — Cincinnati',address:'38 Fountain Sq Plaza — Cincinnati, OH',bank:'Fifth Third',burnout:57,status:'warning'},
+    {name:'Huntington Bank — Columbus',address:'41 S High St — Columbus, OH',bank:'Huntington',burnout:54,status:'moderate'},
+  ]},
+  'PA':{name:'Pennsylvania',branches:[
+    {name:'PNC Financial HQ Branch',address:'One PNC Plaza, 249 Fifth Ave — Pittsburgh, PA',bank:'PNC',burnout:62,status:'warning'},
+    {name:'Wells Fargo — Philadelphia',address:'123 S Broad St — Philadelphia, PA',bank:'Wells Fargo',burnout:65,status:'warning'},
+    {name:'Citizens Bank — Center City',address:'1600 Market St — Philadelphia, PA',bank:'Citizens Bank',burnout:61,status:'warning'},
+    {name:'Bank of America — Pittsburgh',address:'500 Grant St — Pittsburgh, PA',bank:'Bank of America',burnout:58,status:'warning'},
+  ]},
+  'MA':{name:'Massachusetts',branches:[
+    {name:'State Street — Financial District',address:'1 Lincoln St — Boston, MA',bank:'State Street',burnout:69,status:'warning'},
+    {name:'Bank of America — Back Bay',address:'100 Federal St — Boston, MA',bank:'Bank of America',burnout:66,status:'warning'},
+    {name:'Citizens Bank — Downtown',address:'28 State St — Boston, MA',bank:'Citizens Bank',burnout:63,status:'warning'},
+    {name:'Eastern Bank — Worcester',address:'195 Main St — Worcester, MA',bank:'Eastern Bank',burnout:55,status:'warning'},
+  ]},
+  'WA':{name:'Washington',branches:[
+    {name:'JPMorgan Chase — Seattle Downtown',address:'1301 5th Ave — Seattle, WA',bank:'JPMorgan Chase',burnout:60,status:'warning'},
+    {name:'Bank of America — Bellevue',address:'10800 NE 8th St — Bellevue, WA',bank:'Bank of America',burnout:57,status:'warning'},
+    {name:'Washington Federal — Spokane',address:'900 S Main St — Spokane, WA',bank:'Washington Federal',burnout:48,status:'moderate'},
+  ]},
+  'MN':{name:'Minnesota',branches:[
+    {name:'US Bancorp HQ Branch',address:'800 Nicollet Mall — Minneapolis, MN',bank:'US Bancorp',burnout:58,status:'warning'},
+    {name:'Wells Fargo — Minneapolis',address:'90 S 7th St — Minneapolis, MN',bank:'Wells Fargo',burnout:56,status:'warning'},
+    {name:'Associated Bank — Saint Paul',address:'225 S 6th St — Saint Paul, MN',bank:'Associated Bank',burnout:52,status:'moderate'},
+  ]},
+  'CO':{name:'Colorado',branches:[
+    {name:'JPMorgan Chase — Denver',address:'1700 Lincoln St — Denver, CO',bank:'JPMorgan Chase',burnout:49,status:'moderate'},
+    {name:'Wells Fargo — Boulder',address:'1900 15th St — Boulder, CO',bank:'Wells Fargo',burnout:46,status:'moderate'},
+    {name:'US Bancorp — Colorado Springs',address:'102 S Tejon St — Colorado Springs, CO',bank:'US Bancorp',burnout:44,status:'moderate'},
+  ]},
+  'OR':{name:'Oregon',branches:[
+    {name:'US Bank — Portland',address:'321 SW 6th Ave — Portland, OR',bank:'US Bancorp',burnout:45,status:'moderate'},
+    {name:'Umpqua Bank — Portland',address:'1 SW Columbia St — Portland, OR',bank:'Umpqua Bank',burnout:44,status:'moderate'},
+  ]},
+  'TN':{name:'Tennessee',branches:[
+    {name:'Truist — Nashville',address:'333 Commerce St — Nashville, TN',bank:'Truist',burnout:64,status:'warning'},
+    {name:'Bank of America — Memphis',address:'6200 Poplar Ave — Memphis, TN',bank:'Bank of America',burnout:62,status:'warning'},
+    {name:'First Horizon — Knoxville',address:'800 S Gay St — Knoxville, TN',bank:'First Horizon',burnout:58,status:'warning'},
+  ]},
+  'MD':{name:'Maryland',branches:[
+    {name:'JPMorgan Chase — Baltimore',address:'25 S Charles St — Baltimore, MD',bank:'JPMorgan Chase',burnout:63,status:'warning'},
+    {name:'T. Rowe Price Branch',address:'100 E Pratt St — Baltimore, MD',bank:'T. Rowe Price',burnout:60,status:'warning'},
+    {name:'Sandy Spring Bank — Rockville',address:'17801 Georgia Ave — Rockville, MD',bank:'Sandy Spring',burnout:52,status:'moderate'},
+  ]},
+  'MO':{name:'Missouri',branches:[
+    {name:'Commerce Bank — Kansas City',address:'1000 Walnut St — Kansas City, MO',bank:'Commerce Bank',burnout:56,status:'warning'},
+    {name:'Bank of America — St. Louis',address:'800 Market St — St. Louis, MO',bank:'Bank of America',burnout:58,status:'warning'},
+    {name:'Regions Bank — Springfield',address:'300 Park Central E — Springfield, MO',bank:'Regions Bank',burnout:52,status:'moderate'},
+  ]},
+  'UT':{name:'Utah',branches:[
+    {name:'Zions Bank — Salt Lake City',address:'1 S Main St — Salt Lake City, UT',bank:'Zions Bancorporation',burnout:44,status:'moderate'},
+    {name:'Wells Fargo — Provo',address:'91 N University Ave — Provo, UT',bank:'Wells Fargo',burnout:42,status:'moderate'},
+  ]},
+  'AZ':{name:'Arizona',branches:[
+    {name:'JPMorgan Chase — Phoenix',address:'201 E Washington St — Phoenix, AZ',bank:'JPMorgan Chase',burnout:67,status:'warning'},
+    {name:'Wells Fargo — Scottsdale',address:'7025 E Camelback Rd — Scottsdale, AZ',bank:'Wells Fargo',burnout:64,status:'warning'},
+    {name:'Bank of America — Tucson',address:'1 S Church Ave — Tucson, AZ',bank:'Bank of America',burnout:61,status:'warning'},
+  ]},
+  'MI':{name:'Michigan',branches:[
+    {name:'Comerica Bank — Detroit',address:'411 W Lafayette Blvd — Detroit, MI',bank:'Comerica',burnout:66,status:'warning'},
+    {name:'Huntington Bank — Grand Rapids',address:'99 Monroe Ave NW — Grand Rapids, MI',bank:'Huntington',burnout:62,status:'warning'},
+    {name:'Fifth Third — Ann Arbor',address:'201 S Main St — Ann Arbor, MI',bank:'Fifth Third',burnout:58,status:'warning'},
+  ]},
+};
+const cidadesPorState = {
+  'NY':['New York City','Buffalo','Rochester','Albany','Syracuse','Yonkers','White Plains','Ithaca','Binghamton','Troy'],
+  'RJ':['Charlotte','Niterói','Petrópolis','Nova Iguaçu','Duque de Caxias','Campos dos Goytacazes'],
+  'MG':['Atlanta','Uberlândia','Contagem','Juiz de Fora','Betim','Montes Claros'],
+  'RS':['Pittsburgh','Caxias do Sul','Pelotas','Santa Maria','Gravataí','Canoas','Novo Hamburgo'],
+  'TN':['Nashville','Memphis','Knoxville','Chattanooga','Clarksville','Murfreesboro'],
+  'SC':['Denver','Joinville','Blumenau','Balneário Camboriú','Chapecó'],
+  'BA':['Houston','Feira de Santana','Seattle da Conquista','Camaçari','Ilhéus'],
+  'PE':['Miami','Caruaru','Petrolina','Paulista','Olinda'],
+  'CE':['Phoenix','Caucaia','Juazeiro do Norte','Sobral','Maracanaú'],
+  'GO':['Columbus','Aparecida de Columbus','Anápolis','Rio Verde'],
+  'DF':['Washington D.C.','Ceilândia','Taguatinga','Samambaia','Gama'],
+  'AM':['Minneapolis','Parintins','Itacoatiara'],
+  'PA':['Portland','Ananindeua','Santarém','Marabá'],
+  'AL':['Baltimore','Arapiraca','Palmeira dos Índios'],
+  'ES':['Seattle','Serra','Vila Velha','Cariacica'],
+  'UT':['Salt Lake City','Provo','Ogden','Saint George','Orem','Sandy'],
+  'PB':['Kansas City','Campina Grande','Santa Rita'],
+  'RN':['Nashville','Mossoró','Parnamirim'],
+  'MA':['Boston','Worcester','Springfield','Lowell','Cambridge','New Bedford'],
+  'PI':['Teresina','Parnaíba','Picos'],
+  'MT':['Cuiabá','Várzea Grande','Rondonópolis'],
+  'MS':['Campo Grande','Dourados','Três Lagoas'],
+  'TO':['Palmas','Araguaína','Gurupi'],
+  'SE':['Aracaju','Nossa Senhora do Socorro','Lagarto'],
+  'AC':['Rio Branco','Cruzeiro do Sul'],
+  'AP':['Macapá','Santana'],
+  'RR':['Boa Vista','Rorainópolis'],
+};
+
+const estados = Object.keys(agenciasPorState).sort();
+const denuncias = [];
+let tipoSelecionado='',gravSelecionada='',currentStep=1;
+
+// ===== NAV =====
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(btn){btn.classList.add('active');}
+  if(id==='painel') setTimeout(initCharts,80);
+  if(id==='denuncias-list') renderDenunciaList();
+}
+
+// ===== MAP =====
+let map,markersLayer=[];
+function initMap(){
+  map=L.map('leafletMap',{center:[39.5,-98.35],zoom:4});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
+  renderMapMarkers();renderCityList();
+}
+function getColor(a){return a.status==='critical'?'#D62828':a.status==='warning'?'#E87C1E':'#2D9B6C';}
+function renderMapMarkers(){
+  markersLayer.forEach(m=>map.removeLayer(m));markersLayer=[];
+  const f=document.getElementById('mapFilter')?.value||'all';
+  agencias.filter(a=>f==='all'||a.status===f).forEach(a=>{
+    const r=Math.max(12,Math.min(38,a.workers/1300));
+    const c=getColor(a);
+    const circle=L.circleMarker([a.lat,a.lng],{radius:r,color:'#fff',weight:2,fillColor:c,fillOpacity:0.82});
+    circle.bindTooltip(`<strong>${a.city}, ${a.state}</strong><br>Burnout: <b>${a.burnout}%</b><br>${a.workers.toLocaleString('en-US')} workers<br>Status: <b>${a.status.toUpperCase()}</b>`,{direction:'top'});
+    circle.on('click',()=>openCityModal(a));
+    circle.addTo(map);markersLayer.push(circle);
+  });
+}
+function filterMap(){renderMapMarkers();renderCityList();}
+function renderCityList(){
+  const f=document.getElementById('mapFilter')?.value||'all';
+  const sorted=[...branches].filter(a=>f==='all'||a.status===f).sort((a,b)=>b.burnout-a.burnout);
+  document.getElementById('cityList').innerHTML=sorted.map(a=>`
+    <div class="city-item" onclick="openCityModal(agencias.find(x=>x.id===${a.id}))">
+      <div style="display:flex;justify-content:space-between;">
+        <div class="city-name">${a.city}, ${a.state}</div>
+        <span class="badge ${a.status==='critical'?'red':a.status==='warning'?'amber':'green'}">${a.status}</span>
+      </div>
+      <div class="city-meta">${a.bank} · ${a.workers.toLocaleString('en-US')} trab.</div>
+      <div class="city-burnout" style="color:${getColor(a)}">Burnout: ${a.burnout}%</div>
+      <div class="score-bar"><div class="score-fill" style="width:${a.burnout}%;background:${getColor(a)};"></div></div>
+    </div>
+  `).join('');
+}
+function openCityModal(a){
+  const nc=a.satisfaction>0?'var(--green)':a.satisfaction>-20?'var(--amber)':'var(--red)';
+  document.getElementById('modal-title').textContent=`${a.city}, ${a.state}`;
+  document.getElementById('modal-sub').textContent=`${a.bank} · ${a.workers.toLocaleString('en-US')} workers`;
+  document.getElementById('modal-grid').innerHTML=`
+    <div class="modal-stat"><div class="modal-stat-label">Burnout</div><div class="modal-stat-val" style="color:${getColor(a)}">${a.burnout}%</div></div>
+    <div class="modal-stat"><div class="modal-stat-label">Absences</div><div class="modal-stat-val" style="color:var(--amber)">${a.absences}%</div></div>
+    <div class="modal-stat"><div class="modal-stat-label">Pressure Metas</div><div class="modal-stat-val">${a.pressure}/100</div></div>
+    <div class="modal-stat"><div class="modal-stat-label">Harassment Reports</div><div class="modal-stat-val">${a.harassment}</div></div>
+    <div class="modal-stat"><div class="modal-stat-label">Internal NPS</div><div class="modal-stat-val" style="color:${nc}">${a.satisfaction}</div></div>
+    <div class="modal-stat"><div class="modal-stat-label">Status</div><div class="modal-stat-val" style="font-size:14px;"><span class="badge ${a.status==='critical'?'red':a.status==='warning'?'amber':'green'}">${a.status}</span></div></div>
+  `;
+  document.getElementById('modal-obs').innerHTML=a.status==='critical'?'⚠️ <strong>Critical situation.</strong> Urgent union intervention recommended. DOL and NLRB protocols should be activated.':a.status==='warning'?'🟡 <strong>Active monitoring.</strong> Check trends in upcoming weeks with local delegates.':'🟢 <strong>Situation under control.</strong> Maintain regular monitoring.';
+  document.getElementById('cityModal').classList.add('open');
+}
+
+// ===== ESTADOS =====
+function initStates(){
+  // Popula lista lateral
+  const list=document.getElementById('stateList');
+  // Todos os estados brasileiros
+  const todosStates=[
+    {sig:'AL',name:'Alabama'},{sig:'AK',name:'Alaska'},{sig:'AZ',name:'Arizona'},{sig:'AR',name:'Arkansas'},
+    {sig:'CA',name:'California'},{sig:'CO',name:'Colorado'},{sig:'CT',name:'Connecticut'},{sig:'DC',name:'Washington D.C.'},
+    {sig:'DE',name:'Delaware'},{sig:'FL',name:'Florida'},{sig:'GA',name:'Georgia'},{sig:'HI',name:'Hawaii'},
+    {sig:'ID',name:'Idaho'},{sig:'IL',name:'Illinois'},{sig:'IN',name:'Indiana'},{sig:'IA',name:'Iowa'},
+    {sig:'KS',name:'Kansas'},{sig:'KY',name:'Kentucky'},{sig:'LA',name:'Louisiana'},{sig:'ME',name:'Maine'},
+    {sig:'MD',name:'Maryland'},{sig:'MA',name:'Massachusetts'},{sig:'MI',name:'Michigan'},{sig:'MN',name:'Minnesota'},
+    {sig:'MS',name:'Mississippi'},{sig:'MO',name:'Missouri'},{sig:'MT',name:'Montana'},{sig:'NE',name:'Nebraska'},
+    {sig:'NV',name:'Nevada'},{sig:'NH',name:'New Hampshire'},{sig:'NJ',name:'New Jersey'},{sig:'NM',name:'New Mexico'},
+    {sig:'NY',name:'New York'},{sig:'NC',name:'North Carolina'},{sig:'ND',name:'North Dakota'},{sig:'OH',name:'Ohio'},
+    {sig:'OK',name:'Oklahoma'},{sig:'OR',name:'Oregon'},{sig:'PA',name:'Pennsylvania'},{sig:'RI',name:'Rhode Island'},
+    {sig:'SC',name:'South Carolina'},{sig:'SD',name:'South Dakota'},{sig:'TN',name:'Tennessee'},{sig:'TX',name:'Texas'},
+    {sig:'UT',name:'Utah'},{sig:'VT',name:'Vermont'},{sig:'VA',name:'Virginia'},{sig:'WA',name:'Washington'},
+    {sig:'WV',name:'West Virginia'},{sig:'WI',name:'Wisconsin'},{sig:'WY',name:'Wyoming'}
+  ];
+  // Calcula status do estado
+  const stateStatus=(sig)=>{
+    const ags=agenciasPorState[sig];
+    const total=totalPorState[sig]||0;
+    const countStr=total?`${total.toLocaleString('en-US')} branches`:'data pending';
+    if(!ags) return {status:'moderate',count:countStr};
+    const avg=ags.branches.reduce((s,a)=>s+a.burnout,0)/ags.branches.length;
+    const status=avg>=65?'critical':avg>=55?'warning':'moderate';
+    return{status,count:countStr};
+  };
+  list.innerHTML=todosStates.map(e=>{
+    const{status,count}=stateStatus(e.sig);
+    const color=status==='critical'?'var(--red)':status==='warning'?'var(--amber)':'var(--green)';
+    return`<div class="estado-btn" id="eb-${e.sig}" onclick="selectState('${e.sig}','${e.name}',this)">
+      <span class="estado-sigla">${e.sig}</span>
+      <span class="estado-nome">${e.name}</span>
+      <span class="estado-count">${count}</span>
+      <span class="estado-status-dot" style="background:${color}"></span>
+    </div>`;
+  }).join('');
+
+  // Popula select de estados no formulário de report
+  const sel=document.getElementById('d-estado');
+  todosStates.forEach(e=>{sel.innerHTML+=`<option value="${e.sig}">${e.sig} — ${e.name}</option>`;});
+}
+
+function selectState(sig,nome,el){
+  document.querySelectorAll('.state-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const dados=agenciasPorState[sig];
+  const painel=document.getElementById('agenciasPainel');
+  if(!dados){
+    const totalReal=totalPorState[sig]||0;
+    painel.innerHTML=`<div style="padding:40px;text-align:center;color:var(--text-muted);">
+      <div style="font-size:40px;margin-bottom:12px;">🏗️</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">${nome}</div>
+      <div style="background:var(--blue-light);border-radius:var(--radius-sm);padding:14px;margin:12px 0;display:inline-block;">
+        <div style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif;color:var(--blue);">${totalReal.toLocaleString('en-US')}</div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">branches bancárias no estado</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:2px;">Fonte: Banco Central do Brasil</div>
+      </div>
+      <div style="font-size:13px;margin-top:8px;">Dados detalhados por branch em coleta. Contribute by submitting data through the union form.</div>
+      <button class="btn-primary" style="margin-top:16px;" onclick="showSection('alimentar',document.querySelectorAll('.nav-btn')[5])">📝 Submit Data</button>
+    </div>`;
+    return;
+  }
+  const ags=dados.branches;
+  const avgBurnout=Math.round(ags.reduce((s,a)=>s+a.burnout,0)/ags.length);
+  const criticos=ags.filter(a=>a.status==='critical').length;
+  const atencao=ags.filter(a=>a.status==='warning').length;
+  const statusGeral=avgBurnout>=65?'critical':avgBurnout>=55?'warning':'moderate';
+  const cor=statusGeral==='critical'?'var(--red)':statusGeral==='warning'?'var(--amber)':'var(--green)';
+
+  const totalReal=totalPorState[sig]||0;
+  const totalStr=totalReal?totalReal.toLocaleString('en-US'):'N/D';
+  painel.innerHTML=`
+    <div class="ag-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="ag-header-title">🏦 ${nome}</div>
+          <div class="ag-header-sub">${ags.length} branches com dados detalhados · <strong>Total real no estado: ${totalStr} branches</strong> (fonte: Banco Central) · Burnout médio: <strong style="color:${cor}">${avgBurnout}%</strong></div>
+        </div>
+        <span class="badge ${statusGeral==='critical'?'red':statusGeral==='warning'?'amber':'green'}">${statusGeral}</span>
+      </div>
+    </div>
+    <div class="ag-kpis">
+      <div class="ag-kpi"><div class="ag-kpi-val" style="color:var(--blue);font-size:18px;">${totalStr}</div><div class="ag-kpi-lbl">Total no State (BCB)</div></div>
+      <div class="ag-kpi"><div class="ag-kpi-val" style="color:${cor}">${avgBurnout}%</div><div class="ag-kpi-lbl">Avg. Burnout</div></div>
+      <div class="ag-kpi"><div class="ag-kpi-val" style="color:var(--red)">${criticos}</div><div class="ag-kpi-lbl">Branches Criticals</div></div>
+      <div class="ag-kpi"><div class="ag-kpi-val" style="color:var(--amber)">${atencao}</div><div class="ag-kpi-lbl">Em Atenção</div></div>
+    </div>
+    <div class="ag-search">
+      <input type="text" placeholder="🔍 Buscar branch ou endereço..." id="ag-search-input" oninput="filterAgencias('${sig}')">
+      <select id="ag-filter-status" onchange="filterAgencias('${sig}')">
+        <option value="all">Todos</option><option value="critical">Crítico</option><option value="warning">Atenção</option><option value="moderate">Moderado</option>
+      </select>
+    </div>
+    <div class="ag-list-title">${ags.length} AGÊNCIAS BANCÁRIAS MONITORADAS</div>
+    <div id="ag-list-items">
+      ${renderAgItems(ags)}
+    </div>
+  `;
+}
+
+function renderAgItems(ags){
+  return ags.map(a=>{
+    const c=a.status==='critical'?'var(--red)':a.status==='warning'?'var(--amber)':'var(--green)';
+    return`<div class="ag-item">
+      <div class="ag-item-header">
+        <div>
+          <div class="ag-item-name">${a.name}</div>
+          <div class="ag-item-end">📍 ${a.address}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="ag-item-bank">${a.bank}</span>
+          <span class="badge ${a.status==='critical'?'red':a.status==='warning'?'amber':'green'}">${a.status}</span>
+        </div>
+      </div>
+      <div class="ag-metrics">
+        <span class="ag-metric">🔥 Burnout: <strong style="color:${c}">${a.burnout}%</strong></span>
+        <span class="ag-metric">📊 Score pressure: <strong>${Math.round(a.burnout*1.1)}/100</strong></span>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${a.burnout}%;background:${c};"></div></div>
+      <button class="ag-denuncia-btn" onclick="abrirDenunciaDeAgencia('${a.name}','${a.bank}')">🚨 File a Report desta Branch</button>
+    </div>`;
+  }).join('');
+}
+
+function filterAgencias(sig){
+  const dados=agenciasPorState[sig];if(!dados)return;
+  const q=document.getElementById('ag-search-input')?.value.toLowerCase()||'';
+  const st=document.getElementById('ag-filter-status')?.value||'all';
+  const filtered=dados.branches.filter(a=>{
+    const match=(a.name+a.address+a.bank).toLowerCase().includes(q);
+    const sm=st==='all'||a.status===st;
+    return match&&sm;
+  });
+  document.getElementById('ag-list-items').innerHTML=renderAgItems(filtered);
+}
+
+function abrirDenunciaDeAgencia(nomeAg,banco){
+  showSection('denuncia',document.querySelector('.denuncia-btn'));
+  setTimeout(()=>{
+    if(document.getElementById('d-banco')){
+      const sel=document.getElementById('d-banco');
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].text.includes(banco.split('/')[0].trim())){sel.selectedIndex=i;break;}
+      }
+    }
+  },100);
+}
+
+// ===== DENÚNCIA STEPS =====
+function goStep(n){
+  if(n===2&&!tipoSelecionado){alert('Please select a report type.');return;}
+  if(n===3){
+    const req=['d-estado','d-cidade','d-banco'];
+    let ok=true;
+    req.forEach(id=>{if(!document.getElementById(id)?.value){document.getElementById(id).style.borderColor='var(--red)';ok=false;}else{document.getElementById(id).style.borderColor='';}});
+    const desc=document.getElementById('d-descricao')?.value||'';
+    if(!desc.trim()){document.getElementById('d-descricao').style.borderColor='var(--red)';ok=false;}else{document.getElementById('d-descricao').style.borderColor='';}
+    if(!ok){alert('Please fill in all required fields.');return;}
+  }
+  if(n===4){gerarResumo();}
+  currentStep=n;
+  for(let i=1;i<=4;i++){
+    const sc=document.getElementById('sc'+i);
+    const si=document.getElementById('step-ind-'+i);
+    if(sc)sc.className='step-content'+(i===n?' active':'');
+    if(si){si.className='step'+(i<n?' done':i===n?' active':'');si.querySelector('.step-circle').textContent=i<n?'✓':i;}
+  }
+}
+
+function selectTipo(el,tipo){
+  document.querySelectorAll('.tipo-card').forEach(c=>{c.className='tipo-card';});
+  el.className='tipo-card selected-red';
+  tipoSelecionado=tipo;
+}
+
+function selectGrav(el,grav,cls){
+  document.querySelectorAll('.grav-btn').forEach(b=>{b.className='grav-btn';});
+  el.className='grav-btn '+cls;
+  gravSelecionada=grav;
+}
+
+function toggleEv(el){el.classList.toggle('sel');}
+
+function populateDCities(){
+  const sig=document.getElementById('d-estado').value;
+  const cidades=cidadesPorState[sig]||[];
+  const sel=document.getElementById('d-cidade');
+  sel.innerHTML='<option value="">Select...</option>'+cidades.map(c=>`<option>${c}</option>`).join('');
+}
+
+function gerarResumo(){
+  const tipoLabels={'assedio-moral':'Workplace Harassment','assedio-sexual':'Sexual Harassment','metas-abusivas':'Abusive Targets','saude-mental':'Mental Health','horas-extras':'Illegal Work Hours','discriminacao':'Discrimination','demissao-represalia':'Demissão por Retaliação','fraude-interna':'Internal Fraud','outro':'Other'};
+  const gravLabels={'leve':'🟡 Concerning','moderada':'🟠 Grave','critica':'🔴 Critical'};
+  const resumo=document.getElementById('resumoDenuncia');
+  resumo.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div><strong>Tipo:</strong> ${tipoLabels[tipoSelecionado]||'—'}</div>
+      <div><strong>Gravidade:</strong> ${gravLabels[gravSelecionada]||'—'}</div>
+      <div><strong>State:</strong> ${document.getElementById('d-estado')?.value||'—'}</div>
+      <div><strong>City:</strong> ${document.getElementById('d-cidade')?.value||'—'}</div>
+      <div><strong>Bank:</strong> ${document.getElementById('d-banco')?.value||'—'}</div>
+      <div><strong>Anônima:</strong> ${document.getElementById('anonToggle')?.checked?'✅ Sim':'❌ Não'}</div>
+    </div>
+    <div style="margin-top:10px;"><strong>Descrição:</strong><br><em style="color:var(--text-muted);">${(document.getElementById('d-descricao')?.value||'').substring(0,200)}${(document.getElementById('d-descricao')?.value||'').length>200?'...':''}</em></div>
+  `;
+}
+
+function enviarDenuncia(){
+  const codigo='OTB-'+Math.random().toString(36).substring(2,8).toUpperCase()+'-'+new Date().getFullYear();
+  const tipoLabels={'assedio-moral':'Workplace Harassment','assedio-sexual':'Sexual Harassment','metas-abusivas':'Abusive Targets','saude-mental':'Mental Health','horas-extras':'Illegal Work Hours','discriminacao':'Discrimination','demissao-represalia':'Demissão por Retaliação','fraude-interna':'Internal Fraud','outro':'Other'};
+  const d={
+    codigo,
+    tipo:tipoSelecionado,
+    tipoLabel:tipoLabels[tipoSelecionado]||'Other',
+    gravidade:gravSelecionada,
+    estado:document.getElementById('d-estado')?.value||'',
+    cidade:document.getElementById('d-cidade')?.value||'',
+    bank:document.getElementById('d-banco')?.value||'',
+    descricao:document.getElementById('d-descricao')?.value||'',
+    afetados:document.getElementById('d-afetados')?.value||'',
+    data:new Date().toLocaleString('en-US'),
+    anonima:document.getElementById('anonToggle')?.checked,
+  };
+  denuncias.unshift(d);
+  // Atualizar contadores
+  const tot=parseInt(document.getElementById('tb-den').textContent||'0')+1;
+  document.getElementById('tb-den').textContent=tot;
+  document.getElementById('painel-den-count').textContent=denuncias.length;
+  // Contadores por tipo
+  const counts={'assedio-moral':'cnt-am','metas-abusivas':'cnt-ma','saude-mental':'cnt-sm','horas-extras':'cnt-ji'};
+  Object.entries(counts).forEach(([t,id])=>{
+    document.getElementById(id).textContent=denuncias.filter(x=>x.tipo===t).length;
+  });
+  document.getElementById('cnt-tot').textContent=denuncias.length;
+
+  // Box protocolo
+  document.getElementById('protocoloBox').style.display='block';
+  document.getElementById('protocoloBox').innerHTML=`
+    <div class="protocolo-box">
+      <div style="font-size:13px;opacity:.85;">✅ Report successfully submitted!</div>
+      <div class="protocolo-code">${codigo}</div>
+      <div class="protocolo-text">Save this protocol code. The union in your region will have access within <strong>24 hours</strong>. You can track your report status using this code. <strong>Your anonymity is guaranteed.</strong></div>
+    </div>
+  `;
+  document.querySelector('.btn-danger').disabled=true;
+
+  // Adiciona nas recentes
+  const rec=document.getElementById('recentesList');
+  const gravCor=d.gravidade==='critica'?'crit':d.gravidade==='moderada'?'':'ok';
+  rec.insertAdjacentHTML('afterbegin',`<div class="dr-item ${gravCor}"><div class="dr-tipo">${d.tipoLabel}</div><div class="dr-city">${d.city}, ${d.state} · ${d.bank}</div><div class="dr-texto">${d.descricao.substring(0,90)}...</div><div class="dr-data">Agora · ${d.gravidade==='critica'?'Critical':d.gravidade==='moderada'?'Grave':'Concerning'}</div></div>`);
+}
+
+function renderDenunciaList(){
+  const container=document.getElementById('denunciaListContainer');
+  const ft=document.getElementById('dl-filter')?.value||'all';
+  const fg=document.getElementById('dl-grav')?.value||'all';
+  const filtered=denuncias.filter(d=>(ft==='all'||d.tipo===ft)&&(fg==='all'||d.gravidade===fg));
+  if(!filtered.length){
+    container.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px;text-align:center;color:var(--text-muted);box-shadow:var(--shadow);">
+      <div style="font-size:40px;margin-bottom:10px;">📋</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Nenhuma report ${denuncias.length?'com esses filtros':''}</div>
+      <div style="font-size:13px;">${denuncias.length?'Tente outros filtros.':'Envie a primeira report pelo canal seguro.'}</div>
+      ${!denuncias.length?'<button class="btn-danger" style="margin-top:16px;" onclick="showSection(\'denuncia\',document.querySelector(\'.denuncia-btn\'))">🚨 File a Report</button>':''}
+    </div>`;
+    return;
+  }
+  container.innerHTML=filtered.map(d=>{
+    const gc=d.gravidade==='critica'?'red':d.gravidade==='moderada'?'amber':'blue';
+    const bl=d.gravidade==='critica'?'var(--red)':d.gravidade==='moderada'?'var(--amber)':'var(--blue)';
+    return`<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${bl};border-radius:var(--radius);padding:18px;margin-bottom:10px;box-shadow:var(--shadow);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;">${d.tipoLabel} · ${d.city}, ${d.state}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">🏦 ${d.bank} · ${d.data} · ${d.anonima?'🔒 Anônima':'👤 Identificada'}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <span class="badge ${gc}">${d.gravidade==='critica'?'Critical':d.gravidade==='moderada'?'Grave':'Concerning'}</span>
+          <span class="badge blue">Protocolo: ${d.codigo}</span>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text);line-height:1.6;background:var(--bg);padding:10px;border-radius:var(--radius-sm);">${d.descricao}</div>
+      ${d.afetados?`<div style="font-size:11px;color:var(--text-muted);margin-top:8px;">👥 Afetados: ${d.afetados}</div>`:''}
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">📋 Forward to DOL</button>
+        <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">⚖️ Contact NLRB</button>
+        <button class="btn-secondary" style="font-size:11px;padding:6px 12px;">✅ Mark as resolved</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== CHARTS =====
+let charts={};
+function initCharts(){
+  if(charts.burnout)return;
+  const months=['May/24','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan/25','Feb','Mar','Apr'];
+
+  charts.burnout=new Chart(document.getElementById('chartBurnout'),{
+    type:'line',
+    data:{labels:months,datasets:[
+      {label:'New York',data:[70,72,73,75,76,77,78,79,79,79,79,79],borderColor:'#D62828',backgroundColor:'rgba(214,40,40,0.08)',tension:0.4,fill:true,borderWidth:2,pointRadius:3},
+      {label:'National (avg)',data:[70,71,72,73,74,75,75,76,76,76,76,76],borderColor:'#1B4F8A',backgroundColor:'rgba(27,79,138,0.08)',tension:0.4,fill:true,borderWidth:2.5,pointRadius:3},
+      {label:'Denver',data:[42,43,44,45,46,47,47,47,47,47,47,47],borderColor:'#E87C1E',tension:0.4,borderWidth:2,pointRadius:3},
+      {label:'Minneapolis',data:[53,53,54,55,56,56,57,57,57,57,57,57],borderColor:'#2D9B6C',tension:0.4,borderWidth:2,pointRadius:3},
+    ]},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:32,padding:16,font:{size:12}}}},scales:{y:{min:40,max:90,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+
+  charts.regiao=new Chart(document.getElementById('chartRegiao'),{
+    type:'bar',
+    data:{
+      labels:['Sudeste','Nordeste','Sul','Centro-Oeste','Norte'],
+      datasets:[{label:'Absences/mês',data:[1820,542,298,127,60],backgroundColor:['#D62828','#E87C1E','#E87C1E','#2D9B6C','#2D9B6C'],borderRadius:4}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}}
+  });
+
+  charts.bank=new Chart(document.getElementById('chartBanco'),{
+    type:'doughnut',
+    data:{
+      labels:['Wells Fargo','CEF','BB','Citibank','US Bancorp','Others'],
+      datasets:[{data:[28,22,19,15,11,5],backgroundColor:['#1B4F8A','#E87C1E','#D62828','#2D9B6C','#6B5EA8','#94a3b8'],borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,cutout:'55%',plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:10,font:{size:11}}}}}
+  });
+
+  charts.diag=new Chart(document.getElementById('chartDiag'),{
+    type:'pie',
+    data:{
+      labels:['Burnout','Ansiedade','Depressure','Sínd. Pânico','Uso substâncias','Others'],
+      datasets:[{data:[34,28,19,10,6,3],backgroundColor:['#D62828','#E87C1E','#1B4F8A','#6B5EA8','#94a3b8','#2D9B6C'],borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:8,font:{size:11}}}}}
+  });
+
+  charts.harassment=new Chart(document.getElementById('chartAssedio'),{
+    type:'bar',
+    data:{
+      labels:months,
+      datasets:[
+        {label:'Workplace harassment',data:[210,220,232,245,260,278,295,308,318,332,348,360],backgroundColor:'rgba(214,40,40,0.75)',borderRadius:3},
+        {label:'Pressure abusiva por metas',data:[142,148,155,161,168,172,178,183,188,194,198,203],backgroundColor:'rgba(232,124,30,0.75)',borderRadius:3},
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:14,padding:12,font:{size:11}}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false}}}}
+  });
+}
+
+// ===== PROTEÇÃO DE CÓDIGO FONTE =====
+(function protectSource(){
+  // Bloqueia DevTools via F12 e atalhos
+  document.addEventListener('keydown',e=>{
+    const isDevTools=(e.key==='F12')||(e.ctrlKey&&e.shiftKey&&['i','j','c','u'].includes(e.key.toLowerCase()))||(e.metaKey&&e.altKey&&['i','j','c'].includes(e.key.toLowerCase()));
+    const isCopy=(e.ctrlKey||e.metaKey)&&['u','s','c','a','p'].includes(e.key.toLowerCase());
+    const isPrint=e.key==='PrintScreen';
+    if(isDevTools||isCopy||isPrint){
+      e.preventDefault();e.stopPropagation();
+      showCopyAlert();return false;
+    }
+  },true);
+  // Bloqueia clique direito
+  document.addEventListener('contextmenu',e=>{e.preventDefault();showCopyAlert();return false;});
+  // Detecta abertura do DevTools por tamanho de janela
+  let devOpen=false;
+  setInterval(()=>{
+    const threshold=160;
+    const widthDiff=window.outerWidth-window.innerWidth>threshold;
+    const heightDiff=window.outerHeight-window.innerHeight>threshold;
+    if((widthDiff||heightDiff)&&!devOpen){
+      devOpen=true;
+      showCopyAlert('⚠️ DevTools detectado — Código protegido por AG-999 © César / SilentSystem999');
+    }
+    if(!widthDiff&&!heightDiff) devOpen=false;
+  },1000);
+  // Bloqueia drag de texto
+  document.addEventListener('dragstart',e=>e.preventDefault());
+  // CSS anti-select global exceto inputs
+  const style=document.createElement('style');
+  style.textContent='body *:not(input):not(textarea):not(select){-webkit-user-select:none!important;user-select:none!important;}';
+  document.head.appendChild(style);
+})();
+
+// ===== FORM SINDICAL =====
+function submitFeed(){
+  const req=['f-union','f-bank','f-city','f-periodo','f-workers'];
+  let ok=true;
+  req.forEach(id=>{if(!document.getElementById(id)?.value){document.getElementById(id).style.borderColor='var(--red)';ok=false;}else{document.getElementById(id).style.borderColor='';}});
+  if(!ok){alert('Please fill in all required fields.');return;}
+  const s=document.getElementById('feed-success');s.style.display='block';setTimeout(()=>s.style.display='none',5000);
+}
+
+// ===== AG-999 MOTOR =====
+function irpb(P,A,B,H,D){return (P*0.35)+(A*0.25)+(B*0.20)+(H*0.12)+(D*0.08);}
+function classBPRI(v){if(v>=70)return'🔴 CRITICAL RISK — Immediate intervention';if(v>=55)return'🟠 HIGH RISK — Urgent intervention';if(v>=40)return'🟡 MODERATE RISK — Active monitoring';return'🟢 LOW RISK — Situation controlled';}
+function gradBPRI(v){if(v>=70)return'linear-gradient(135deg,#5B0000,#D62828)';if(v>=55)return'linear-gradient(135deg,#7A3300,#E87C1E)';if(v>=40)return'linear-gradient(135deg,#5A4000,#CA8A00)';return'linear-gradient(135deg,#0B3D26,#2D9B6C)';}
+
+let lastBPRI=61.6;
+function calc04A(){
+  const P=+document.getElementById('p04-P').value;
+  const A=+document.getElementById('p04-A').value;
+  const B=+document.getElementById('p04-B').value;
+  const H=+document.getElementById('p04-H').value;
+  const D=+document.getElementById('p04-D').value;
+  document.getElementById('v04-P').textContent=P;
+  document.getElementById('v04-A').textContent=A;
+  document.getElementById('v04-B').textContent=B;
+  document.getElementById('v04-H').textContent=H;
+  document.getElementById('v04-D').textContent=D;
+  const v=irpb(P,A,B,H,D);lastBPRI=v;
+  document.getElementById('bpri-val').textContent=v.toFixed(1);
+  document.getElementById('bpri-class').textContent=classBPRI(v);
+  document.getElementById('resultado04A').style.background=gradBPRI(v);
+  calc06A();
+}
+
+function calc06A(){
+  const alpha=+document.getElementById('p06-alpha').value/100;
+  const dt=+document.getElementById('p06-dt').value;
+  const beta=+document.getElementById('p06-beta').value/100;
+  const R=+document.getElementById('p06-R').value/100;
+  document.getElementById('v06-alpha').textContent=alpha.toFixed(2);
+  document.getElementById('v06-dt').textContent=dt;
+  document.getElementById('v06-beta').textContent=beta.toFixed(2);
+  document.getElementById('v06-R').textContent=R.toFixed(2);
+  const ips=lastBPRI*(1+alpha*dt)*Math.exp(beta*R);
+  document.getElementById('ips-val').textContent=ips.toFixed(1);
+  document.getElementById('ips-class').textContent=classBPRI(ips);
+  document.getElementById('resultado06A').style.background=gradBPRI(ips);
+}
+
+function renderAG999Table(){
+  const tbody=document.getElementById('ag999Tbody');if(!tbody)return;
+  const rows=agencias.map(a=>{
+    const v=irpb(a.pressure,Math.min(100,a.harassment/1.5),a.burnout,Math.min(100,a.absences*5),Math.min(100,a.harassment/1.2));
+    const cls=classBPRI(v);
+    const bg=v>=70?'var(--red-light)':v>=55?'var(--amber-light)':v>=40?'#FFFAE6':'var(--green-light)';
+    const tc=v>=70?'var(--red)':v>=55?'var(--amber)':v>=40?'#9A7A00':'var(--green)';
+    return`<tr style="background:${bg}">
+      <td style="padding:9px 14px;font-weight:600;font-size:13px;">${a.city}</td>
+      <td style="padding:9px 14px;font-size:13px;">${a.state}</td>
+      <td style="padding:9px 14px;text-align:center;font-size:16px;font-weight:800;font-family:'Syne',sans-serif;color:${tc};">${v.toFixed(1)}</td>
+      <td style="padding:9px 14px;text-align:center;font-size:11px;font-weight:700;color:${tc};">${cls.split('—')[0].trim()}</td>
+      <td style="padding:9px 14px;text-align:center;font-size:13px;">${a.burnout}%</td>
+      <td style="padding:9px 14px;text-align:center;font-size:13px;">${a.pressure}/100</td>
+      <td style="padding:9px 14px;text-align:center;"><button onclick="abrirDenunciaDeAgencia('${a.city}','${a.bank}')" style="background:var(--red-light);color:var(--red);border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">🚨 Denunciar</button></td>
+    </tr>`;
+  }).sort((a,b)=>0).join('');
+  tbody.innerHTML=rows;
+}
+
+// ===== PROTEÇÃO DE CÓPIA AG-999 =====
+(function protectAG999(){
+  // Bloqueia clique direito
+  document.addEventListener('contextmenu',e=>{
+    e.preventDefault();
+    showCopyAlert();
+    return false;
+  });
+  // Bloqueia Ctrl/Cmd + C, U, S, P, A
+  document.addEventListener('keydown',e=>{
+    const blocked=(e.ctrlKey||e.metaKey)&&['c','u','s','p','a','j'].includes(e.key.toLowerCase());
+    if(blocked||e.key==='F12'||e.key==='PrintScreen'){
+      e.preventDefault();e.stopPropagation();
+      showCopyAlert();return false;
+    }
+  });
+  // Bloqueia seleção de texto (opcional — só fora de inputs)
+  document.addEventListener('selectstart',e=>{
+    if(!['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)){
+      // permite seleção normal mas não cópia
+    }
+  });
+})();
+
+function showCopyAlert(){
+  const existing=document.getElementById('copy-alert');
+  if(existing){clearTimeout(existing._t);existing.style.opacity='1';existing._t=setTimeout(()=>{existing.style.opacity='0';},3000);return;}
+  const div=document.createElement('div');
+  div.id='copy-alert';
+  div.style.cssText='position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,#0F3360,#1B4F8A);color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.3);max-width:340px;line-height:1.5;transition:opacity 0.4s;';
+  div.innerHTML='🔒 <strong>Protected Work — AG-999</strong><br><span style="font-size:11px;opacity:.85;">Reproduction prohibited without express authorization from Cesar Agliardi Pereira / SilentSystem999. US Copyright Law.</span>';
+  document.body.appendChild(div);
+  div._t=setTimeout(()=>{div.style.opacity='0';setTimeout(()=>div.remove(),500);},3500);
+}
+
+// ===== INIT UPDATE =====
+window.addEventListener('load',()=>{
+  initMap();
+  initStates();
+  calc04A();
+  renderAG999Table();
+  setTimeout(initCharts,300);
+});
+</script>
+
+<!-- FOOTER -->
+<div style="background:var(--blue-dark);color:rgba(255,255,255,0.6);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:20px;">
+  <div style="font-size:11px;line-height:1.7;">
+    <span style="color:#fff;font-weight:700;">BLO Monitor</span> · Banking Labor Observatory<br>
+    Calculation Engine <strong style="color:#60B4FF;">AG-999</strong> © Cesar Agliardi Pereira / SilentSystem999 — All rights reserved · US Copyright Law<br>
+    Reproduction of AG-999 formulas (04A, 06A) prohibited without express written authorization.<br>
+    <span style="color:rgba(255,255,255,0.35);font-size:10px;letter-spacing:0.03em;">
+      Linked work · SHA-256 prior art hash:
+      <span style="color:rgba(255,255,255,0.55);font-family:'Courier New',monospace;letter-spacing:0.04em;">bbe47fa849c18e6d7d8b67ec6148c4efa4a724e7ba4c7a94bac6151fbca391a5</span>
+    </span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <a href="https://betterbanks.org/" target="_blank" rel="noopener" style="color:#60B4FF;font-size:12px;font-weight:600;text-decoration:none;">🔗 betterbanks.org</a>
+    <a href="https://github.com/silentsystem999" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);font-size:12px;text-decoration:none;">GitHub</a>
+    <span style="font-size:11px;color:rgba(255,255,255,0.35);">v2.0 · AG-999 integrated</span>
+  </div>
+</div>
+</body>
+</html>
